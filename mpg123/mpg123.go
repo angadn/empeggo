@@ -4,7 +4,8 @@ package mpg123
 
 /*
 #include <mpg123.h>
-#cgo LDFLAGS: -lmpg123
+#cgo CFLAGS: -I/usr/local/include
+#cgo LDFLAGS: -L/usr/local/lib -lmpg123
 */
 import "C"
 
