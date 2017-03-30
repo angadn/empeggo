@@ -241,9 +241,11 @@ func (dr DecoderReader) Read(bytes []byte) (int, error) {
 // DecoderReader gives you an io.Reader for streaming-decoding. It performs
 // a combination of Feed and Read, and relies on you to first call OpenFeed
 // before invoking DecoderReader.Read.
-func (d *Decoder) DecoderReader(src io.Reader, fps int, channels int) io.Reader {
+func (d *Decoder) DecoderReader(
+	src io.Reader, fps int, channels int, encoding int,
+) io.Reader {
 	d.FormatNone()
-	d.Format(int64(fps), channels, 208) // As seen with GetFormat on macOS
+	d.Format(int64(fps), channels, encoding) // As seen with GetFormat on macOS
 	return DecoderReader{
 		decoder:  d,
 		src:      src,
@@ -254,6 +256,6 @@ func (d *Decoder) DecoderReader(src io.Reader, fps int, channels int) io.Reader 
 
 // MonoDecoderReader is an alias that gives you an io.Reader for
 // decoding a stream that is known to be mono-channeled.
-func (d *Decoder) MonoDecoderReader(src io.Reader, fps int) io.Reader {
-	return d.DecoderReader(src, fps, 1)
+func (d *Decoder) MonoDecoderReader(src io.Reader, fps int, encoding int) io.Reader {
+	return d.DecoderReader(src, fps, 1, encoding)
 }
