@@ -202,9 +202,7 @@ func (dr DecoderReader) Read(bytes []byte) (int, error) {
 
 		// Feed data
 		if n, err = dr.src.Read(buf); err == nil {
-			if err = dr.decoder.Feed(buf[0:n]); err == nil {
-
-			}
+			err = dr.decoder.Feed(buf[0:n])
 		} else if err != io.EOF { // EOF in Feed does NOT mean EOF in Read!
 			return 0, err
 		}
