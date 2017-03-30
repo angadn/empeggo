@@ -211,7 +211,7 @@ func (dr DecoderReader) Read(bytes []byte) (int, error) {
 
 		// Read output
 		var done C.size_t
-		msg := C.mpg123_read(dr.decoder.handle, (*C.uchar)(&buf[0]), C.size_t(len(buf)), &done)
+		msg := C.mpg123_read(dr.decoder.handle, (*C.uchar)(&bytes[0]), C.size_t(len(bytes)), &done)
 		switch msg {
 		case C.MPG123_NEW_FORMAT:
 			rate, channel, encoding := dr.decoder.GetFormat()
