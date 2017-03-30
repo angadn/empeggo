@@ -12,6 +12,8 @@ import "C"
 import (
 	"errors"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"unsafe"
 )
@@ -181,4 +183,77 @@ func (d *Decoder) Feed(buf []byte) error {
 		return fmt.Errorf("mpg123 error: %s", d.strerror())
 	}
 	return nil
+}
+
+// DecoderReader is the way to decode streaming MP3
+type DecoderReader struct {
+	decoder  *Decoder
+	src      io.Reader
+	fps      int
+	channels int
+}
+
+// Read duck-types DecoderReader into io.Reader.
+func (dr DecoderReader) Read(bytes []byte) (int, error) {
+	buf := make([]byte, 64*1024)
+	for {
+		var n int
+		var err error
+
+		// Feed data
+		if n, err = dr.src.Read(buf); err == nil {
+			if err = dr.decoder.Feed(buf[0:n]); err == nil {
+
+			}
+		} else if err != io.EOF { // EOF in Feed does NOT mean EOF in Read!
+			return 0, err
+		}
+
+		// Read output
+		var done C.size_t
+		msg := C.mpg123_read(dr.decoder.handle, (*C.uchar)(&buf[0]), C.size_t(len(buf)), &done)
+		switch msg {
+		case C.MPG123_NEW_FORMAT:
+			rate, channel, encoding := dr.decoder.GetFormat()
+			log.Printf(
+				"New format with rate: %d, channels: %d, encoding: %d", rate, channel, encoding,
+			)
+			fallthrough
+		case C.MPG123_OK:
+			fallthrough
+		case C.MPG123_DONE:
+			if n > 0 {
+				return n, err
+			}
+			fallthrough
+		case C.MPG123_NEED_MORE:
+			if err == io.EOF {
+				// Source exhausted, so signal EOF
+				dr.decoder.Close()
+				dr.decoder.Delete()
+				return n, io.EOF
+			}
+			log.Print("Non-EOF error: ", err)
+		}
+	}
+}
+
+// DecoderReader gives you an io.Reader for streaming-decoding. It performs
+// a combination of Feed and Read, and relies on you to first call OpenFeed
+// before invoking DecoderReader.Read.
+func (d *Decoder) DecoderReader(src io.Reader, fps int, channels int) io.Reader {
+	d.FormatNone()
+	d.Format(int64(fps), channels, 208) // As seen with GetFormat on macOS
+	return DecoderReader{
+		decoder:  d,
+		src:      src,
+		fps:      fps,
+		channels: channels,
+	}
+}
+
+// MonoDecoderReader is an alias that gives you an io.Reader for
+// decoding a stream that is known to be mono-channeled.
+func (d *Decoder) MonoDecoderReader(src io.Reader, fps int) io.Reader {
+	return d.DecoderReader(src, fps, 1)
 }
