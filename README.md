@@ -40,7 +40,17 @@ when EOF is returned, so check for errors after processing the buffer.
 Useful when working with custom audio-protocols!
 
 	decoder.OpenFeed() // You must call this manually first
+	// Get a DecoderReader for an output format
 	outputReader := decoder.DecoderReader(inputReader, 44100, 1, mpg123.ENC_SIGNED_16)
+
+	buf := make([]byte, 16*1024)
+	for {
+		if n, err := outputReader.Read(buf); err != io.EOF {
+			// Do your thing with buf[0:n]
+		} else {
+			break
+		}
+	}
 	// outputReader will Close and Delete itself automatically when data is over 😇
 
 Examples
