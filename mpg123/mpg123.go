@@ -242,7 +242,7 @@ func (d *Decoder) DecoderReader(
 	src io.Reader, fps int, channels int, encoding int,
 ) io.Reader {
 	d.FormatNone()
-	d.Format(int64(fps), channels, encoding) // As seen with GetFormat on macOS
+	d.Format(int64(fps), channels, encoding)
 	return DecoderReader{
 		decoder:  d,
 		src:      src,
