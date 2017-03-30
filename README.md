@@ -1,7 +1,7 @@
 Introduction
 ------------
 
-empeggo is a fork to decode buffers with MPG123
+empeggo is [a fork](https://github.com/bobertlo/go-mpg123) to decode buffers with MPG123
 This library is still very much a work in progress.
 
 Usage
