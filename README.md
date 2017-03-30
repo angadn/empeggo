@@ -1,18 +1,12 @@
 Introduction
 ------------
 
-go-mpg123 is a library that provides bindings to libmpg123.
-
-Not all library functions are present, but there are enough bindings to
-decode an MP3 file using mpg123_open and mpg123_read. However, decoding
-from a file reader and feeding data directly to the decoder are not yet
-supported. Seeking and meta-data reading are also not yet supported.
-
+empeggo is a fork to decode buffers with MPG123
 This library is still very much a work in progress.
 
 Usage
 -----
-
+#### Decoding a file
 The mpg123 library is accessed via a Decoder struct containing a C pointer
 to an instance of the library. To decode a file, first create an instance of the decoder,
 then tell it to open the file.
@@ -41,6 +35,13 @@ when EOF is returned, so check for errors after processing the buffer.
 			break
 		}
 	}
+
+#### Decoding a Reader
+Useful when working with custom audio-protocols!
+
+	decoder.OpenFeed() // You must call this manually first
+	outputReader := decoder.DecoderReader(inputReader, 44100, 1, mpg123.ENC_SIGNED_16)
+	// outputReader will Close and Delete itself automatically when data is over 😇
 
 Examples
 --------
