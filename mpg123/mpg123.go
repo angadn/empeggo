@@ -222,8 +222,8 @@ func (dr DecoderReader) Read(bytes []byte) (int, error) {
 		case C.MPG123_OK:
 			fallthrough
 		case C.MPG123_DONE:
-			if n > 0 {
-				return n, err
+			if done > 0 {
+				return int(done), err
 			}
 			fallthrough
 		case C.MPG123_NEED_MORE:
@@ -231,7 +231,7 @@ func (dr DecoderReader) Read(bytes []byte) (int, error) {
 				// Source exhausted, so signal EOF
 				dr.decoder.Close()
 				dr.decoder.Delete()
-				return n, io.EOF
+				return int(done), io.EOF
 			}
 			log.Print("Non-EOF error: ", err)
 		}
