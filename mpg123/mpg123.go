@@ -191,6 +191,19 @@ type DecoderReader struct {
 	src      io.Reader
 	fps      int
 	channels int
+	paranoid bool
+}
+
+// Paranoid mode shuts off the decoder on a non-EOF error (handy if your input is a duplex network stream).
+func (dr *DecoderReader) Paranoid() *DecoderReader {
+	dr.paranoid = true
+	return dr
+}
+
+// Nuke kills our DecoderReader appropriately
+func (dr DecoderReader) Nuke() {
+	dr.decoder.Close()
+	dr.decoder.Delete()
 }
 
 // Read duck-types DecoderReader into io.Reader.
@@ -206,7 +219,14 @@ func (dr DecoderReader) Read(bytes []byte) (int, error) {
 				log.Print("Error while feeding to mpg123: ", err)
 			}
 		} else if err != io.EOF { // EOF in Feed does NOT mean EOF in Read!
+			if dr.paranoid {
+				dr.Nuke()
+			}
+
 			return 0, err
+		} else if dr.paranoid {
+			dr.Nuke()
+			return 0, io.EOF
 		}
 
 		// Read output
@@ -229,8 +249,7 @@ func (dr DecoderReader) Read(bytes []byte) (int, error) {
 			}
 			if err == io.EOF {
 				// Source exhausted, so signal EOF
-				dr.decoder.Close()
-				dr.decoder.Delete()
+				dr.Nuke()
 				return int(done), io.EOF
 			}
 		}
@@ -250,6 +269,7 @@ func (d *Decoder) DecoderReader(
 		src:      src,
 		fps:      fps,
 		channels: channels,
+		paranoid: false,
 	}
 }
 
