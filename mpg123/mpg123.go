@@ -261,10 +261,10 @@ func (dr DecoderReader) Read(bytes []byte) (int, error) {
 // before invoking DecoderReader.Read.
 func (d *Decoder) DecoderReader(
 	src io.Reader, fps int, channels int, encoding int,
-) DecoderReader {
+) *DecoderReader {
 	d.FormatNone()
 	d.Format(int64(fps), channels, encoding)
-	return DecoderReader{
+	return &DecoderReader{
 		decoder:  d,
 		src:      src,
 		fps:      fps,
@@ -275,6 +275,6 @@ func (d *Decoder) DecoderReader(
 
 // MonoDecoderReader is an alias that gives you an io.Reader for
 // decoding a stream that is known to be mono-channeled.
-func (d *Decoder) MonoDecoderReader(src io.Reader, fps int, encoding int) DecoderReader {
+func (d *Decoder) MonoDecoderReader(src io.Reader, fps int, encoding int) *DecoderReader {
 	return d.DecoderReader(src, fps, 1, encoding)
 }
