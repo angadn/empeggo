@@ -202,7 +202,6 @@ func (dr *DecoderReader) Paranoid() *DecoderReader {
 
 // Nuke kills our DecoderReader appropriately
 func (dr DecoderReader) Nuke() {
-	dr.decoder.Close()
 	dr.decoder.Delete()
 }
 
