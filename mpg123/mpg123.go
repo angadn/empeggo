@@ -202,7 +202,8 @@ func (dr *DecoderReader) Paranoid() *DecoderReader {
 
 // Nuke kills our DecoderReader appropriately
 func (dr DecoderReader) Nuke() {
-	dr.decoder.Delete()
+	dr.decoder.Close()
+	// dr.decoder.Delete() // Commented-out because it causes a SIGABRT 😰
 }
 
 // Read duck-types DecoderReader into io.Reader.
