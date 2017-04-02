@@ -218,15 +218,10 @@ func (dr DecoderReader) Read(bytes []byte) (int, error) {
 			if err = dr.decoder.Feed(buf[0:n]); err != nil {
 				log.Print("Error while feeding to mpg123: ", err)
 			}
-		} else if err != io.EOF { // EOF in Feed does NOT mean EOF in Read!
-			if dr.paranoid {
-				dr.Nuke()
-			}
-
-			return 0, err
 		} else if dr.paranoid {
+			// Note: EOF in Feed does NOT mean EOF in Read!
 			dr.Nuke()
-			return 0, io.EOF
+			return 0, err
 		}
 
 		// Read output
